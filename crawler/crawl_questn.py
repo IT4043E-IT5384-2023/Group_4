@@ -49,7 +49,7 @@ def crawl_questn_quest_users(quest_id):
     print(f"Getting quest {quest_id} users info ...")
     num_pages = get_num_pages(api["questn_get_quest_users"].format(quest_id, 1, 1))
     users = {}
-    for page in tqdm(range(1, num_pages+1)):
+    for page in tqdm(range(1, min(50, num_pages+1))):
         res = requests.get(api["questn_get_quest_users"].format(quest_id, page, 24))
         if res.status_code :
             json_res = res.json()
