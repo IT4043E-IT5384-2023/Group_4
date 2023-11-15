@@ -4,18 +4,18 @@ from tweety import Twitter
 import tweety
 
 app = Twitter("session")
-with open("crawler/password.json", "r") as f:
-    data = json.load(f)
-    username = data["username"]
-    password = data["password"]
-app.sign_in(username, password)
 if not os.path.exists("data/twitter"):
     os.makedirs("data/twitter")
 
-def scrape_tweets(username):
+def scrape_tweets(username, args):
     if username == "":
         print("Empty username")
         return
+    with open(args.twitter_pw, "r") as f:
+        data = json.load(f)
+        username = data["username"]
+        password = data["password"]
+    app.sign_in(username, password)
     print(f"Scrapping tweets from '{username}'")
     start = time.time()
     try:

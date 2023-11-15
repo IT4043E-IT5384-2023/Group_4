@@ -3,7 +3,7 @@ from .crawl_twitter import scrape_tweets
 from .utils import save_json,load_json
 import os
 
-def main():
+def main(args):
     print("Starting to crawl data")
     if not os.path.exists("data/questn/all_users.json"):
         if not os.path.exists("data/questn/quests.json"):
@@ -17,7 +17,7 @@ def main():
             for user_id in users.keys():
                 if user_id not in all_users:
                     all_users[user_id] = users[user_id]
-            if len(all_users) > 5000:
+            if len(all_users) > args.max_num_users:
                 break
         save_json("data/questn/all_users.json", all_users)
     else:
@@ -25,4 +25,4 @@ def main():
         all_users = get_all_users()
     for user_id in list(all_users.keys())[::-1]:
         if not f"{all_users[user_id]['twitter_username']}.json" in os.listdir("data/twitter"):
-            scrape_tweets(all_users[user_id]["twitter_username"])
+            scrape_tweets(all_users[user_id]["twitter_username"], args)
