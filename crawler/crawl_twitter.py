@@ -13,9 +13,9 @@ def scrape_tweets(username, args):
         return
     with open(args.twitter_pw, "r") as f:
         data = json.load(f)
-        username = data["username"]
+        account = data["username"]
         password = data["password"]
-    app.sign_in(username, password)
+    app.sign_in(account, password)
     print(f"Scrapping tweets from '{username}'")
     start = time.time()
     try:
