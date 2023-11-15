@@ -1,4 +1,4 @@
-import json, os
+import json, os, time
 from .utils import save_json
 from tweety import Twitter
 import tweety
@@ -17,9 +17,11 @@ def scrape_tweets(username):
         print("Empty username")
         return
     print(f"Scrapping tweets from '{username}'")
+    start = time.time()
     try:
         tweets = app.get_tweets(username, pages=100, wait_time=30)
         save_json(f"data/twitter/{username}.json", tweets)
+        print(f"Done in {(time.time() - start)/3600:.2f} hours") 
     except tweety.exceptions_.UserNotFound:
         print(f"User '{username}' not found")
     except:

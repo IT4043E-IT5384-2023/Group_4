@@ -4,11 +4,13 @@ from .utils import save_json,load_json
 import os
 
 def main():
-    if not os.path.exists("data/questn/quests.json"):
-        quests = crawl_questn_quests()
-    else:
-        quests = load_json("data/questn/quests.json")
+    print("Starting to crawl data")
     if not os.path.exists("data/questn/all_users.json"):
+        if not os.path.exists("data/questn/quests.json"):
+            quests = crawl_questn_quests()
+        else:
+            print("Loading quests from file")
+            quests = load_json("data/questn/quests.json")
         all_users = {}
         for quest_id in quests.keys():
             users = crawl_questn_quest_users(quest_id)
@@ -19,7 +21,8 @@ def main():
                 break
         save_json("data/questn/all_users.json", all_users)
     else:
+        print("Loading users from file")
         all_users = get_all_users()
-    for user in all_users.values():
-        if not f"{user['twitter_username']}.json" in os.listdir("data/twitter"):
-            scrape_tweets(user["twitter_username"])
+    for user_id in list(all_users.keys())[::-1]:
+        if not f"{all_users[user_id]['twitter_username']}.json" in os.listdir("data/twitter"):
+            scrape_tweets(all_users[user_id]["twitter_username"])
