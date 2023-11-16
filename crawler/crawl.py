@@ -23,6 +23,6 @@ def main(args):
     else:
         print("Loading users from file")
         all_users = get_all_users()
-    for user_id in list(all_users.keys())[::-1]:
+    for user_id in list(all_users.keys())[args.start:args.end]:
         if not f"{all_users[user_id]['twitter_username']}.json" in os.listdir("data/twitter"):
             scrape_tweets(all_users[user_id]["twitter_username"], args)
