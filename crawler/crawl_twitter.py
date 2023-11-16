@@ -15,8 +15,7 @@ def scrape_tweets(username, args):
         data = json.load(f)
         account = data["username"]
         password = data["password"]
-        if "extra" in data:
-            extra = data["extra"]
+        extra = data["extra"] if "extra" in data else ""
     if extra:
         app.sign_in(account, password, extra=extra)
     else:
