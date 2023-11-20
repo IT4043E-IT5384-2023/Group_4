@@ -41,6 +41,7 @@ __pycache__
 
 # folder #
 #####################
+twitter
 data
 test*
 password.json

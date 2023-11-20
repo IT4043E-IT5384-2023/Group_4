@@ -1,8 +1,7 @@
 # Big Data Storage and Processing project
+# Group 4 - Problem 2
 
-## Group 4 - Problem 2
-
-#### Installation requirement:
+## Installation requirement:
 
 Firstly, you need to run the installation `requirements.txt`:
 
@@ -10,7 +9,7 @@ Firstly, you need to run the installation `requirements.txt`:
 pip install -r requirements.txt
 ```
 
-#### Crawling data from Twitter & QuestN:
+## Crawling data from Twitter & QuestN:
 
 For more information, please read [`crawler/README.md`](crawler/README.md)
 
