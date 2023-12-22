@@ -27,6 +27,10 @@ def load_args():
     parser.add_argument("--chain", type=str, required=True, choices=valid_chains)
     return parser.parse_args()
 
+def save_to_bucket(blob_name, data):
+    bucket = get_gc_bucket()
+    write_gc_json_blob(bucket, blob_name, data)
+
 def main():
     args = load_args()
     topic = TOPIC + "_" + args.chain
@@ -39,6 +43,7 @@ def main():
     consumer.subscribe([topic])
     all_projects = {}
     all_wallets = {}
+    count = 0
     for message in consumer:
         if message.value == 0:
             break
@@ -46,6 +51,7 @@ def main():
         prj = message.value["prj"]
         addrs = message.value["addrs"]
         if name not in all_projects:
+            count+=1
             print("Received ", name)
             all_projects[name] = prj
             for addr, prj_name in addrs.items():
@@ -53,13 +59,13 @@ def main():
                     all_wallets[addr] = {prj_name: 1}
                 else:
                     all_wallets[addr][prj_name] = all_wallets[addr].get(prj_name, 0) + 1
+        if (count+1) % 100 == 0:
+            save_to_bucket(os.path.join(GCS_PREFIX, "data/smart_contract", f"projects_{args.chain}.json"), all_projects)
+            save_to_bucket(os.path.join(GCS_PREFIX, "data/smart_contract", f"wallets_{args.chain}.json"), all_wallets)
 
     consumer.close()
-    bucket = get_gc_bucket()
-    prj_blob_path = os.path.join(GCS_PREFIX, "data/smart_contract", f"projects_{args.chain}.json")
-    wlt_blob_path = os.path.join(GCS_PREFIX, "data/smart_contract", f"wallets_{args.chain}.json")
-    write_gc_json_blob(bucket, prj_blob_path, all_projects)
-    write_gc_json_blob(bucket, wlt_blob_path, all_wallets)
+    save_to_bucket(os.path.join(GCS_PREFIX, "data/smart_contract", f"projects_{args.chain}.json"), all_projects)
+    save_to_bucket(os.path.join(GCS_PREFIX, "data/smart_contract", f"wallets_{args.chain}.json"), all_wallets)
 
 if __name__ == "__main__":
     main()
