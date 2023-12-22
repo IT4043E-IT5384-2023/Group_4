@@ -55,3 +55,6 @@ def run():
     )
     bucket = get_gc_bucket()
     write_gc_json_blob(bucket, blob_path, projects)
+
+if __name__ == "__main__":
+    run()
