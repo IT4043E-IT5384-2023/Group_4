@@ -84,7 +84,7 @@ class SmartContractCrawler:
             "marketShareNFT": prj.get("marketShareNFT", 0),
             "marketShareDefi": prj.get("marketShareDefi", 0),
         }
-
+        addresses = {}
         for r in tqdm(res):
             to_addr = r[0]
             is_good = r[1]
@@ -93,11 +93,11 @@ class SmartContractCrawler:
             else:
                 prj["numberOfBadContracts"] = prj["numberOfBadContracts"] + 1
             trans = self.transaction_db.find({"to_address": {"$eq": to_addr}})
-            addresses = set()
+            tran_addresses = set()
             for tran in trans:
-                addresses.add(tran["from_address"])
+                tran_addresses.add(tran["from_address"])
                 addresses[tran["from_address"]] = project_name
             prj["numberOfContractsTransactions"] = prj.get(
                 "numberOfContractsTransactions", 0
-            ) + len(addresses)
+            ) + len(tran_addresses)
         return prj, addresses
