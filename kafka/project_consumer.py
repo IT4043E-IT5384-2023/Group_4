@@ -41,12 +41,12 @@ def run():
         group_id="project-consumer",
     )
     consumer.subscribe([topic])
+    projects = {}
     for message in consumer:
         if message.value == 0:
             break
         projects = message.value["prj"]
         print(f"Received {len(projects)} projects")
-        break
 
     consumer.close()
 
@@ -55,6 +55,7 @@ def run():
     )
     bucket = get_gc_bucket()
     write_gc_json_blob(bucket, blob_path, projects)
+
 
 if __name__ == "__main__":
     run()
