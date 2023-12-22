@@ -35,12 +35,12 @@ def run():
     args = load_args()
     topic = TOPIC + "_" + args.chain
     consumer = KafkaConsumer(
-        topics=[topic],
         bootstrap_servers=[KAFKA_SERVER],
         value_deserializer=lambda v: json.loads(v.decode("utf-8")),
         auto_offset_reset="earliest",
         group_id="project-consumer",
     )
+    consumer.subscribe([topic])
     for message in consumer:
         if message.value == 0:
             break
