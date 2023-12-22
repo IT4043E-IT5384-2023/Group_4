@@ -30,7 +30,7 @@ def load_args():
     ]
     parser.add_argument("--chain", type=str, required=True, choices=valid_chains)
     parser.add_argument("--start", type=int, default=None)
-    parser.add_argument("--end", type=int, default=None)
+    parser.add_argument("--num_producer", type=int, default=None)
     return parser.parse_args()
 
 def main():
@@ -46,11 +46,11 @@ def main():
         GCS_PREFIX, "data/smart_contract", f"projects_{args.chain}.json"
     )
     project_names = read_gc_json_blob(bucket, prj_blob_path)
-    if args.start is None or args.start < 0:
-        args.start = 0
-    if args.end is None or args.end >= len(project_names):
-        args.end = len(project_names) - 1
-    for project_name in project_names[args.start : args.end]:
+    chunk = len(project_names) // args.num_producer
+    start = args.start * chunk
+    end = (args.start + 1) * chunk if args.start != args.num_producer - 1 else len(project_names)
+    
+    for project_name in project_names[start : end]:
         try:
             prj, addrs = sm_cralwer.extract(project_name)
         except psycopg2.OperationalError:
