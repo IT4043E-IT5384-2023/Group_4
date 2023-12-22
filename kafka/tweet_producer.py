@@ -75,8 +75,9 @@ def main():
     )
     bucket = get_gc_bucket()
     prj_blob_path = os.path.join(
-        GCS_PREFIX, "data/smart-contract", f"projects_{args.chain}.json"
+        GCS_PREFIX, "data/smart_contract", f"projects_{args.chain}.json"
     )
+    print(prj_blob_path)
     projects = read_gc_json_blob(bucket, prj_blob_path)
     chunk = len(projects) // args.num_producer
     start = args.start * chunk
