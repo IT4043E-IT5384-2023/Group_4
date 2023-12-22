@@ -1,6 +1,4 @@
-import json, os, time
-from utils import save_json
-from tweety import Twitter
+import json, os
 import tweety
 
 class TweetCrawler:
