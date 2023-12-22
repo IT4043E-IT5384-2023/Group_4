@@ -64,8 +64,8 @@ def main():
         }
         producer.send(topic, value=data)
         print("Sent ", project_name)
-
-    producer.send(topic, value=0)
+    if end == len(project_names):
+        producer.send(topic, value=0)
     producer.close()
 
 if __name__ == "__main__":

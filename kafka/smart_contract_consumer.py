@@ -30,6 +30,10 @@ def load_args():
 def save_to_bucket(blob_name, data):
     bucket = get_gc_bucket()
     write_gc_json_blob(bucket, blob_name, data)
+    
+def load_from_bucket(blob_name):
+    bucket = get_gc_bucket()
+    return read_gc_json_blob(bucket, blob_name)
 
 def main():
     args = load_args()
@@ -41,8 +45,8 @@ def main():
         group_id="smart-contract-consumer",
     )
     consumer.subscribe([topic])
-    all_projects = {}
-    all_wallets = {}
+    all_projects = load_from_bucket(os.path.join(GCS_PREFIX, "data/smart_contract", f"projects_{args.chain}.json"))
+    all_wallets = load_from_bucket(os.path.join(GCS_PREFIX, "data/smart_contract", f"wallets_{args.chain}.json"))
     count = 0
     for message in consumer:
         if message.value == 0:
