@@ -44,5 +44,7 @@ __pycache__
 twitter
 data
 test*
-password*
+password
 *.tw_session
+.env
+*.json
