@@ -1,6 +1,6 @@
 from utils import *
 from tqdm import tqdm
-import os
+import os, time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -52,7 +52,7 @@ class SmartContractCrawler:
         return res
 
     def extract(self, project_name):
-        query = f"SELECT contract_address FROM {self.chain}.smart_contract WHERE project = '{project_name}';"
+        query = f"SELECT contract_address, is_good FROM {self.chain}.smart_contract WHERE project = '{project_name}';"
         cursor = self.pg_conn.cursor()
         cursor.execute(query)
         res = cursor.fetchall()
@@ -60,15 +60,45 @@ class SmartContractCrawler:
             print(f"No contract address found for {project_name}")
             return
         prj = self.projects_db.find_one({"_id": "-".join(project_name.split("_"))})
+        prj = {
+            "_id": prj["_id"],
+            "name": prj.get("name", ""),
+            "category": prj.get("category", ""),
+            "source": " ".join(prj.get("source", [])),
+            "volume": prj.get("volume", 0),
+            "numberOfUsers": prj.get("numberOfUsers", 0),
+            "numberOfTransactions": prj.get("numberOfTransactions", 0),
+            "numberOfItems": prj.get("numberOfItems", 0),
+            "numberOfOwners": prj.get("numberOfOwners", 0),
+            "transactionVolume": prj.get("transactionVolume", 0),
+            "tvl": prj.get("tvl", 0),
+            "socialAccounts": prj.get("socialAccounts", []),
+            "rankDefi": prj.get("rankDefi", 0),
+            "rankNft": prj.get("rankNft", 0),
+            "rankTVL": prj.get("rankTVL", 0),
+            "lastUpdatedAt": prj.get("lastUpdatedAt", time.time()),
+            "tvlByChains": prj.get("tvlByChains", {}).get(self.chain[6:], 0),
+            "numberOfGoodContracts": 0,
+            "numberOfBadContracts": 0,
+            "marketShare": prj.get("marketShare", 0),
+            "marketShareNFT": prj.get("marketShareNFT", 0),
+            "marketShareDefi": prj.get("marketShareDefi", 0),
+        }
+        
         addresses = {}
         for r in tqdm(res):
-            count = 0
             to_addr = r[0]
+            is_good = r[1]
+            if is_good:
+                prj["numberOfGoodContracts"] = prj["numberOfGoodContracts"] + 1
+            else:
+                prj["numberOfBadContracts"] = prj["numberOfBadContracts"] + 1
             trans = self.transaction_db.find({"to_address": {"$eq": to_addr}})
+            addreses = set()
             for tran in trans:
-                count += 1
+                addresses.add(tran["from_address"])
                 addresses[tran["from_address"]] = project_name
             prj["numberOfContractsTransactions"] = (
-                prj.get("numberOfContractsTransactions", 0) + count
+                prj.get("numberOfContractsTransactions", 0) + len(addresses)
             )
         return prj, addresses
