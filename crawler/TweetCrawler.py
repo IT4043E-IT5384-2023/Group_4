@@ -11,6 +11,8 @@ TWITTER_WAIT_TIME = os.getenv("TWITTER_WAIT_TIME")
 TWITTER_PAGES = os.getenv("TWITTER_PAGES")
 TWITTER_MIN_FAVORS = os.getenv("TWITTER_MIN_FAVORS")
 
+if not os.path.exists("tw_session"):
+    os.mkdir("tw_session")
 
 class TweetCrawler:
     def __init__(self, account: int = 0):

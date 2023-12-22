@@ -67,7 +67,7 @@ def main():
             if id not in all_tweets:
                 count += 1
                 all_tweets[id] = tweets[id]
-        if (count + 1) % 500 == 0:
+        if (count + 1) % 100 == 0:
             save_to_bucket(
                 os.path.join(GCS_PREFIX, "data/tweet", f"tweets_{args.chain}.json"),
                 all_tweets,
