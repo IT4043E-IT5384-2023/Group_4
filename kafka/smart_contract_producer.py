@@ -29,8 +29,8 @@ def load_args():
         "chain_0xa86a",
     ]
     parser.add_argument("--chain", type=str, required=True, choices=valid_chains)
-    parser.add_argument("--start", type=int, default=None)
-    parser.add_argument("--num_producer", type=int, default=None)
+    parser.add_argument("--start", type=int, default=0)
+    parser.add_argument("--num_producer", type=int, default=10)
     return parser.parse_args()
 
 def main():
@@ -43,13 +43,13 @@ def main():
     )
     bucket = get_gc_bucket()
     prj_blob_path = os.path.join(
-        GCS_PREFIX, "data/smart_contract", f"projects_{args.chain}.json"
+        GCS_PREFIX, "data/project", f"{args.chain}.json"
     )
     project_names = list(read_gc_json_blob(bucket, prj_blob_path))
     chunk = len(project_names) // args.num_producer
     start = args.start * chunk
     end = (args.start + 1) * chunk if args.start != args.num_producer - 1 else len(project_names)
-    
+    print(f"Producer {args.start} will produce {start}-{end} projects of size {len(project_names)}")
     for project_name in project_names[start : end]:
         try:
             prj, addrs = sm_cralwer.extract(project_name)
