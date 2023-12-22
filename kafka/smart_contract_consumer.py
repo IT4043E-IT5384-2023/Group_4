@@ -11,7 +11,6 @@ load_dotenv()
 
 KAFKA_SERVER = os.getenv("KAFKA_SERVER")
 TOPIC = os.getenv("KAFKA_SM_TOPIC")
-GCS_BUCKET = os.getenv("GCS_BUCKET")
 GCS_PREFIX = os.getenv("GCS_PREFIX")
 
 def load_args():
@@ -28,8 +27,7 @@ def load_args():
     parser.add_argument("--chain", type=str, required=True, choices=valid_chains)
     return parser.parse_args()
 
-
-if __name__ == "__main__":
+def main():
     args = load_args()
     topic = TOPIC + "_" + args.chain
     consumer = KafkaConsumer(
@@ -47,8 +45,8 @@ if __name__ == "__main__":
         name = message.value["name"]
         prj = message.value["prj"]
         addrs = message.value["addrs"]
-        print("Received ", name)
         if name not in all_projects:
+            print("Received ", name)
             all_projects[name] = prj
             for addr, prj_name in addrs.items():
                 if addr not in all_wallets:
@@ -58,7 +56,10 @@ if __name__ == "__main__":
 
     consumer.close()
     bucket = get_gc_bucket()
-    prj_blob_path = os.path.join(GCS_BUCKET, GCS_PREFIX, "data/smart_contract", f"projects_{args.chain}.json")
-    wlt_blob_path = os.path.join(GCS_BUCKET, GCS_PREFIX, "data/smart_contract", f"wallets_{args.chain}.json")
+    prj_blob_path = os.path.join(GCS_PREFIX, "data/smart_contract", f"projects_{args.chain}.json")
+    wlt_blob_path = os.path.join(GCS_PREFIX, "data/smart_contract", f"wallets_{args.chain}.json")
     write_gc_json_blob(bucket, prj_blob_path, all_projects)
     write_gc_json_blob(bucket, wlt_blob_path, all_wallets)
+
+if __name__ == "__main__":
+    main()

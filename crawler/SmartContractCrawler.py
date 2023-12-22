@@ -45,7 +45,7 @@ class SmartContractCrawler:
             return []
         res = [
             r[0]
-            for r in res
+            for r in tqdm(res)
             if self.projects_db.find_one({"_id": "-".join(r[0].split("_"))})
         ]
         print(f"Found {len(res)} projects in {self.chain}.smart_contract")

@@ -12,7 +12,6 @@ load_dotenv()
 
 TOPIC = os.getenv("KAFKA_PRJ_TOPIC")
 KAFKA_SERVER = os.getenv("KAFKA_SERVER")
-GCS_BUCKET = os.getenv("GCS_BUCKET")
 GCS_PREFIX = os.getenv("GCS_PREFIX")
 
 
@@ -31,7 +30,7 @@ def load_args():
     return parser.parse_args()
 
 
-def run():
+def main():
     args = load_args()
     topic = TOPIC + "_" + args.chain
     consumer = KafkaConsumer(
@@ -50,12 +49,10 @@ def run():
 
     consumer.close()
 
-    blob_path = os.path.join(
-        GCS_BUCKET, GCS_PREFIX, "data/project", f"{args.chain}.json"
-    )
+    blob_path = os.path.join(GCS_PREFIX, "data/project", f"{args.chain}.json")
     bucket = get_gc_bucket()
     write_gc_json_blob(bucket, blob_path, projects)
 
 
 if __name__ == "__main__":
-    run()
+    main()

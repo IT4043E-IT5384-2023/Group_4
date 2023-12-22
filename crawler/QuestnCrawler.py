@@ -1,7 +1,5 @@
 import requests
 import os
-from tqdm import tqdm
-from utils import save_json, load_json
 
 class QuestnAPI:
     def __init__(self):
@@ -67,7 +65,7 @@ class QuestnCrawler:
             {"quest_id": quest_id, "page": 1, "count": 1},
         )
         users = {}
-        for page in tqdm(range(1, min(21, num_pages + 1))):
+        for page in range(1, min(21, num_pages + 1)):
             res = self.api.make_request(
                 os.getenv("QUESTN_USERS_ENDPOINT"),
                 {"quest_id": quest_id, "page": page, "count": 24},
@@ -78,7 +76,10 @@ class QuestnCrawler:
                     data = json_res["result"]["data"]
                     for user in data:
                         if user["user_id"] not in users:
-                            users[user["user_id"]] = user
+                            users[user["user_id"]] = {
+                                "user_address": user["user_address"],
+                                "twitter_username": user["twitter_username"],
+                            }
                 else:
                     print("Error, API call failed to be jsonified")
             else:

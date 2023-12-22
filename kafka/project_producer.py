@@ -7,8 +7,11 @@ from kafka import KafkaProducer
 from dotenv import load_dotenv
 import os, json
 
+load_dotenv()
+
 TOPIC = os.getenv("KAFKA_PRJ_TOPIC")
 KAFKA_SERVER = os.getenv("KAFKA_SERVER")
+
 
 def load_args():
     parser = ArgumentParser()
@@ -25,7 +28,7 @@ def load_args():
     return parser.parse_args()
 
 
-def run():
+def main():
     args = load_args()
     topic = TOPIC + "_" + args.chain
     crawler = SmartContractCrawler(chain=args.chain)
@@ -38,5 +41,6 @@ def run():
     producer.send(topic, value=0)
     producer.close()
 
+
 if __name__ == "__main__":
-    run()
+    main()

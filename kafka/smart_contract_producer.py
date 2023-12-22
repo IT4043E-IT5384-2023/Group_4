@@ -14,8 +14,8 @@ load_dotenv()
 
 KAFKA_SERVER = os.getenv("KAFKA_SERVER")
 TOPIC = os.getenv("KAFKA_SM_TOPIC")
-GCS_BUCKET = os.getenv("GCS_BUCKET")
 GCS_PREFIX = os.getenv("GCS_PREFIX")
+
 
 def load_args():
     parser = ArgumentParser()
@@ -29,25 +29,28 @@ def load_args():
         "chain_0xa86a",
     ]
     parser.add_argument("--chain", type=str, required=True, choices=valid_chains)
-    parser.add_argument("--start", type=int, default=0)
+    parser.add_argument("--start", type=int, default=None)
     parser.add_argument("--end", type=int, default=None)
     return parser.parse_args()
 
-
-if __name__ == "__main__":
+def main():
     args = load_args()
     topic = TOPIC + "_" + args.chain
     sm_cralwer = SmartContractCrawler(chain=args.chain)
     producer = KafkaProducer(
         bootstrap_servers=[KAFKA_SERVER],
         value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-        auto_offset_reset="earliest",
-        group_id="smart-contract",
     )
     bucket = get_gc_bucket()
-    prj_blob_path = os.path.join(GCS_BUCKET, GCS_PREFIX, "data/smart_contract", f"projects_{args.chain}.json") 
+    prj_blob_path = os.path.join(
+        GCS_PREFIX, "data/smart_contract", f"projects_{args.chain}.json"
+    )
     project_names = read_gc_json_blob(bucket, prj_blob_path)
-    for project_name in project_names:
+    if args.start is None or args.start < 0:
+        args.start = 0
+    if args.end is None or args.end >= len(project_names):
+        args.end = len(project_names) - 1
+    for project_name in project_names[args.start : args.end]:
         try:
             prj, addrs = sm_cralwer.extract(project_name)
         except psycopg2.OperationalError:
@@ -64,3 +67,6 @@ if __name__ == "__main__":
 
     producer.send(topic, value=0)
     producer.close()
+
+if __name__ == "__main__":
+    main()
