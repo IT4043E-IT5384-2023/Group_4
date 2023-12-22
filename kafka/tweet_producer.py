@@ -104,3 +104,6 @@ def main():
     
     producer.send(topic, value={"end": 1/args.num_producer})
     producer.close()
+
+if __name__ == "__main__":
+    main()
