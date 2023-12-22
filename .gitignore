@@ -45,6 +45,6 @@ twitter
 data
 test*
 password
-*.tw_session
+tw_session
 .env
 *.json

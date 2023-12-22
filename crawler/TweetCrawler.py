@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 import json, os
-import tweety
+from tweety import Twitter
+from tweety.filters import SearchFilters
+from tweety.exceptions_ import UserNotFound
 
 load_dotenv()
 
@@ -8,19 +10,21 @@ TWITTER_PASSWORD_PATH = os.getenv("TWITTER_PASSWORD_PATH")
 TWITTER_WAIT_TIME = os.getenv("TWITTER_WAIT_TIME")
 TWITTER_PAGES = os.getenv("TWITTER_PAGES")
 TWITTER_MIN_FAVORS = os.getenv("TWITTER_MIN_FAVORS")
+
+
 class TweetCrawler:
-    def __init__(self, account=0):
+    def __init__(self, account: int = 0):
         self.account = account
         self.sign_in(self.account)
 
     def sign_in(self, acc):
-        with open(os.getenv("TWITTER_PASSWORD_PATH"), "r") as f:
+        with open(TWITTER_PASSWORD_PATH, "r") as f:
             data = json.load(f)
             data = data[acc]
             account = data["username"]
             password = data["password"]
             extra = data["extra"] if "extra" in data else ""
-        self.app = tweety.Twitter("tw_session/" + account)
+        self.app = Twitter("tw_session/" + account)
         if extra:
             self.app.sign_in(account, password, extra=extra)
         else:
@@ -31,10 +35,10 @@ class TweetCrawler:
         try:
             tweets = self.app.get_tweets(
                 username,
-                pages=os.getenv("TWITTER_PAGES"),
-                wait_time=os.getenv("TWITTER_WAIT_TIME"),
+                pages=TWITTER_PAGES,
+                wait_time=TWITTER_WAIT_TIME,
             )
-        except tweety.exceptions_.UserNotFound:
+        except UserNotFound:
             print(f"User '{username}' not found")
         except:
             print("Something went wrong")
@@ -42,9 +46,13 @@ class TweetCrawler:
             return tweets
 
     def get_tweets_by_keywords(self, keywords):
+        query = "("
+        for keyword in keywords:
+            query += f"{keyword} OR #{keyword} OR @{keyword} OR "
+        query = query[:-3] + f"min_faves:{TWITTER_MIN_FAVORS})"
         tweets = self.app.search(
-            f"({keywords[0]} OR {keywords[1]} OR #{keywords[0]} OR #{keywords[1]} OR @{keywords[0]} OR @{keywords[1]}) min_faves:{TWITTER_MIN_FAVORS}",
-            filter_=tweety.filter.SearchFilters.Latest(),
+            query,
+            filter_=SearchFilters.Latest(),
             pages=TWITTER_PAGES,
             wait_time=TWITTER_WAIT_TIME,
         )
