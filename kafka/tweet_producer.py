@@ -51,23 +51,24 @@ def get_keywords(project):
 def process_tweets(tweets):
     p_tweets ={}
     for tweet in tweets:
-        if tweet["id"] not in p_tweets and tweet["lang"] == "en":
+        if tweet["id"] not in p_tweets and tweet._get_language() == "en":
             p_tweets[tweet["id"]] = {
                 "id": tweet["id"],
-                "text": tweet["text"],
-                "date": tweet["date"],
-                "hashtags": tweet["hashtags"],
-                "views": tweet["views"],
-                "reply_counts": tweet["reply_counts"],
-                "retweet_counts": tweet["retweet_counts"],
-                "likes": tweet["likes"],
+                "text": tweet["text"] if tweet["text"] else "",
+                "date": tweet["date"].timestamp() if tweet["date"] else 0,
+                "hashtags": [str(h) for h in tweet["hashtags"]] if tweet["hashtags"] else [],
+                "views": int(tweet["views"]) if tweet["views"] else 0,
+                "reply_counts": tweet["reply_counts"] if tweet["reply_counts"] else 0,
+                "retweet_counts": tweet["retweet_counts"] if tweet["retweet_counts"] else 0,
+                "likes": tweet["likes"] if tweet["likes"] else 0,
                 "is_sensitive": tweet["is_sensitive"],
             }
+    return p_tweets
 
 
 def main():
     args = load_args()
-    topic = TOPIC + "_" + str(args.acc)
+    topic = TOPIC + "_" + args.chain
     tweet_crawler = TweetCrawler(args.acc)
     producer = KafkaProducer(
         bootstrap_servers=[KAFKA_SERVER],
@@ -95,16 +96,19 @@ def main():
             tweets = tweet_crawler.get_tweets_by_keywords(keywords)
         except:
             producer.send(topic, value=data)
+            print("reconnecting")
             tweet_crawler.sign_in(tweet_crawler.account)
             tweets = tweet_crawler.get_tweets_by_keywords(keywords)
-
-        data = {
-            "tweets": process_tweets(tweets),
-        }
-        producer.send(topic, value=data)
+        if tweets:
+            tweets = process_tweets(tweets)
+            data = {
+                "tweets": tweets,
+            }
+            producer.send(topic, value=data)
+            print(f"Sent {len(tweets)} tweets of {name}")
     
     producer.send(topic, value={"end": 1/args.num_producer})
-    producer.close()
+    producer.plush()
 
 if __name__ == "__main__":
     main()

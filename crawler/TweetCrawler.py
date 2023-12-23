@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-import json, os
+import json, os, time
 from tweety import Twitter
 from tweety.filters import SearchFilters
 from tweety.exceptions_ import UserNotFound
@@ -52,11 +52,12 @@ class TweetCrawler:
         for keyword in keywords:
             query += f"{keyword} OR #{keyword} OR @{keyword} OR "
         query = query[:-3] + f"min_faves:{TWITTER_MIN_FAVORS})"
+        s = time.time()
         tweets = self.app.search(
             query,
             filter_=SearchFilters.Latest(),
             pages=TWITTER_PAGES,
             wait_time=TWITTER_WAIT_TIME,
         )
-
+        print(f"Search with keywords: {keywords} in {time.time() - s:.2f}s")
         return tweets

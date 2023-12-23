@@ -10,7 +10,7 @@ import os, json, math
 load_dotenv()
 
 KAFKA_SERVER = os.getenv("KAFKA_SERVER")
-TOPIC = os.getenv("KAFKA_SM_TOPIC")
+TOPIC = os.getenv("KAFKA_TWITTER_TOPIC")
 GCS_PREFIX = os.getenv("GCS_PREFIX")
 
 
@@ -63,6 +63,7 @@ def main():
         if abs(end - 1) < 1e-6:
             break
         tweets = message.value["tweets"]
+        print(f"Received {len(tweets)} tweets")
         for id in tweets:
             if id not in all_tweets:
                 count += 1
