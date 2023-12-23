@@ -60,7 +60,7 @@ def main():
     for message in consumer:
         if "end" in message.value:
             end += message.value["end"]
-        if math.abs(end - 1) < 1e-6:
+        if abs(end - 1) < 1e-6:
             break
         tweets = message.value["tweets"]
         for id in tweets:
