@@ -108,7 +108,7 @@ def main():
             print(f"Sent {len(tweets)} tweets of {name}")
     
     producer.send(topic, value={"end": 1/args.num_producer})
-    producer.plush()
+    producer.close()
 
 if __name__ == "__main__":
     main()
