@@ -1,3 +1,5 @@
+import sys
+sys.path.append(".")
 from kafka import KafkaConsumer
 from dotenv import load_dotenv
 from utils import *
