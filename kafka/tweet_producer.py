@@ -38,6 +38,19 @@ def load_args():
     return parser.parse_args()
 
 
+def chain_keywords(chain):
+    mapping = {
+        "chain_0x1": ["ethereum", "eth"],
+        "chain_0x38": ["bnb"],
+        "chain_0x89": ["polygon"],
+        "chain_0xfa": ["fantom", "ftm"],
+        "chain_0xa4b1": ["Arbitrum One", "arb"],
+        "chain_0xa": ["Optimism"],
+        "chain_0xa86a": ["Avalanche C-Chain"],
+    }
+    return mapping[chain]
+
+
 def get_keywords(project):
     keywords = [
         "_".join(project["_id"].split("-")),
@@ -48,18 +61,23 @@ def get_keywords(project):
     keywords = " ".join(keywords)
     return keywords.strip().split(" ")
 
+
 def process_tweets(tweets):
-    p_tweets ={}
+    p_tweets = {}
     for tweet in tweets:
         if tweet["id"] not in p_tweets and tweet._get_language() == "en":
             p_tweets[tweet["id"]] = {
                 "id": tweet["id"],
                 "text": tweet["text"] if tweet["text"] else "",
                 "date": tweet["date"].timestamp() if tweet["date"] else 0,
-                "hashtags": [str(h) for h in tweet["hashtags"]] if tweet["hashtags"] else [],
-                "views": int(tweet["views"]) if tweet["views"] else 0,
+                "hashtags": [str(h) for h in tweet["hashtags"]]
+                if tweet["hashtags"]
+                else [],
+                # "views": round(float(tweet["views"])) if tweet["views"] else 0,
                 "reply_counts": tweet["reply_counts"] if tweet["reply_counts"] else 0,
-                "retweet_counts": tweet["retweet_counts"] if tweet["retweet_counts"] else 0,
+                "retweet_counts": tweet["retweet_counts"]
+                if tweet["retweet_counts"]
+                else 0,
                 "likes": tweet["likes"] if tweet["likes"] else 0,
                 "is_sensitive": tweet["is_sensitive"],
             }
@@ -107,8 +125,24 @@ def main():
             producer.send(topic, value=data)
             print(f"Sent {len(tweets)} tweets of {name}")
     
-    producer.send(topic, value={"end": 1/args.num_producer})
+    chain_keys = chain_keywords(args.chain)
+    try:
+        tweets = tweet_crawler.get_tweets_by_keywords(chain_keys)
+    except:
+        producer.send(topic, value=data)
+        print("reconnecting")
+        tweet_crawler.sign_in(tweet_crawler.account)
+        tweets = tweet_crawler.get_tweets_by_keywords(chain_keys)
+    if tweets:
+        tweets = process_tweets(tweets)
+        data = {
+            "tweets": tweets,
+        }
+        producer.send(topic, value=data)
+        print(f"Sent {len(tweets)} tweets of {args.chain}")
+    producer.send(topic, value={"end": 1 / args.num_producer})
     producer.close()
+
 
 if __name__ == "__main__":
     main()

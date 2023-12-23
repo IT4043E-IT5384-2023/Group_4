@@ -51,7 +51,7 @@ class TweetCrawler:
         query = "("
         for keyword in keywords:
             query += f"{keyword} OR #{keyword} OR @{keyword} OR "
-        query = query[:-3] + f"min_faves:{TWITTER_MIN_FAVORS})"
+        query = query[:-4] + f") min_faves:{TWITTER_MIN_FAVORS}"
         s = time.time()
         tweets = self.app.search(
             query,
