@@ -76,3 +76,7 @@ python3 kafka/smart_contract_producer.py --chain <chain> --start <start> --num_p
 ```
 
 Note that the `start` and `num_producer` are used to divide data into many KafkaProducer of many processes running in parallel. By default, one process will be the only producer.
+
+## Preprocess and Suggesting data
+
+Our code for this part is in `preprocess` and can be demonstrated in `demo.ipynb`
