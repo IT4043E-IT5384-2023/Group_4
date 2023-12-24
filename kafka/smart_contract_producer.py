@@ -30,7 +30,7 @@ def load_args():
     ]
     parser.add_argument("--chain", type=str, required=True, choices=valid_chains)
     parser.add_argument("--start", type=int, default=0)
-    parser.add_argument("--num_producer", type=int, default=10)
+    parser.add_argument("--num_producer", type=int, default=1)
     return parser.parse_args()
 
 def main():
